@@ -174,7 +174,7 @@ class Sniffer:
         self.shifter.run()
 
     def terminate_shifter(
-        self, sig, frame
+        self,
     ) -> None:
         """Handles termination of the shifter on CTRL+C."""
         self.screen.shifter_break = True
