@@ -1,5 +1,3 @@
-# Shifter.py
-
 import re
 
 from scapy.config import conf
@@ -9,14 +7,10 @@ from scapy.layers.dot11 import (
     Dot11Elt,
     RadioTap,
 )
+from scapy.layers.eap import EAPOL
 from scapy.sendrecv import sniff
 
 from utils import org
-
-try:
-    from scapy.layers.dot11 import EAPOL
-except ImportError:
-    from scapy.layers.eap import EAPOL
 
 
 class Shifter:
@@ -30,7 +24,7 @@ class Shifter:
         self.bss = bss
         self.ess = ess
         self.verbose = verbose
-        self.bss_counter = []
+        self.bss_counter = set()
         self.clients = []
         self.cells = []
         self.ALSA_clients = {}
@@ -149,9 +143,7 @@ class Shifter:
         }
         for dig in range(20):
             try:
-                if (
-                    ELTLAYERS[dig].ID == 0
-                ):  # ESSID
+                if ELTLAYERS[dig].ID == 0:
                     layer_data["essid"] = (
                         ELTLAYERS[dig].info
                     )
@@ -159,7 +151,7 @@ class Shifter:
                     ELTLAYERS[dig].ID == 3
                     and ELTLAYERS[dig].len
                     == 1
-                ):  # Channel
+                ):
                     layer_data["channel"] = (
                         ord(
                             ELTLAYERS[
@@ -167,9 +159,7 @@ class Shifter:
                             ].info
                         )
                     )
-                elif (
-                    ELTLAYERS[dig].ID == 48
-                ):  # WPA2
+                elif ELTLAYERS[dig].ID == 48:
                     layer_data["auth"] = (
                         "WPA2"
                     )
@@ -319,9 +309,7 @@ class Shifter:
             )
 
             if bssid not in self.bss_counter:
-                self.bss_counter.append(
-                    bssid
-                )
+                self.bss_counter.add(bssid)
                 layer_data = self.enc_shift(
                     cap, ELTLAYERS
                 )
